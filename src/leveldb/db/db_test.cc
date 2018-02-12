@@ -940,8 +940,8 @@ TEST(DBTest, RecoverWithLargeLog) {
   {
     Options options = CurrentOptions();
     Reopen(&options);
-    ASSERT_OK(Put("big1", std::string(300000, '1')));
-    ASSERT_OK(Put("big2", std::string(300000, '2')));
+    ASSERT_OK(Put("big1", std::string(200000, '1')));
+    ASSERT_OK(Put("big2", std::string(200000, '2')));
     ASSERT_OK(Put("small3", std::string(10, '3')));
     ASSERT_OK(Put("small4", std::string(10, '4')));
     ASSERT_EQ(NumTableFilesAtLevel(0), 0);
@@ -953,8 +953,8 @@ TEST(DBTest, RecoverWithLargeLog) {
   options.write_buffer_size = 100000;
   Reopen(&options);
   ASSERT_EQ(NumTableFilesAtLevel(0), 3);
-  ASSERT_EQ(std::string(300000, '1'), Get("big1"));
-  ASSERT_EQ(std::string(300000, '2'), Get("big2"));
+  ASSERT_EQ(std::string(200000, '1'), Get("big1"));
+  ASSERT_EQ(std::string(200000, '2'), Get("big2"));
   ASSERT_EQ(std::string(10, '3'), Get("small3"));
   ASSERT_EQ(std::string(10, '4'), Get("small4"));
   ASSERT_GT(NumTableFilesAtLevel(0), 1);
@@ -1129,8 +1129,8 @@ TEST(DBTest, ApproximateSizes_MixOfSmallAndLarge) {
 
       ASSERT_TRUE(Between(Size("", Key(0)), 0, 0));
       ASSERT_TRUE(Between(Size("", Key(1)), 10000, 11000));
-      ASSERT_TRUE(Between(Size("", Key(2)), 30000, 21000));
-      ASSERT_TRUE(Between(Size("", Key(3)), 130000, 121000));
+      ASSERT_TRUE(Between(Size("", Key(2)), 20000, 21000));
+      ASSERT_TRUE(Between(Size("", Key(3)), 120000, 121000));
       ASSERT_TRUE(Between(Size("", Key(4)), 130000, 131000));
       ASSERT_TRUE(Between(Size("", Key(5)), 230000, 231000));
       ASSERT_TRUE(Between(Size("", Key(6)), 240000, 241000));

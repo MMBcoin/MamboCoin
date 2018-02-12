@@ -802,7 +802,7 @@ TEST(TableTest, ApproximateOffsetOfPlain) {
   c.Add("k01", "hello");
   c.Add("k02", "hello2");
   c.Add("k03", std::string(10000, 'x'));
-  c.Add("k04", std::string(300000, 'x'));
+  c.Add("k04", std::string(200000, 'x'));
   c.Add("k05", std::string(300000, 'x'));
   c.Add("k06", "hello3");
   c.Add("k07", std::string(100000, 'x'));

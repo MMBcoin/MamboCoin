@@ -252,7 +252,7 @@ class Benchmark {
       double now = Env::Default()->NowMicros() * 1e-6;
       double micros = (now - last_op_finish_) * 1e6;
       hist_.Add(micros);
-      if (micros > 30000) {
+      if (micros > 20000) {
         fprintf(stderr, "long op: %.1f micros%30s\r", micros, "");
         fflush(stderr);
       }
