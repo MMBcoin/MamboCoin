@@ -1,6 +1,5 @@
 # MamboCoin
 
-<
 <a href="https://discord.gg/ZaxrJ6K"><img src="https://raw.githubusercontent.com/MMBcoin/MamboCoin/master/src/qt/res/images/splash.png" title="MMB" /></a>
 
 ## Join Our Community on Discord!<br>
@@ -64,4 +63,4 @@ https://discord.gg/ZaxrJ6K
     - From block 101 	to  155000	30 MMB
     - From block 155001	to  405000	15 MMB
 
-For questions or comments, Please Email MamboCoin@gmail.com or Vist our Discord.
+For questions or comments, Please Email MamboCoin@gmail.com or Visit our Discord.
