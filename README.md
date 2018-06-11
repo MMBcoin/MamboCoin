@@ -1,3 +1,13 @@
+# MamboCoin
+
+<
+<a href="https://discord.gg/ZaxrJ6K"><img src="https://raw.githubusercontent.com/MMBcoin/MamboCoin/master/src/qt/res/images/splash.png" title="MMB" /></a>
+
+## Join Our Community on Discord!<br>
+<a href="https://discord.gg/ZaxrJ6K"><img src="https://i.imgur.com/ozcqH6a.png" title="MamboCoin Discord" /></a>
+
+https://discord.gg/ZaxrJ6K
+
 # MamboCoin Specifications:
 - POW+POS+MasterNodes
 - Algo: X11
@@ -53,3 +63,5 @@
     - From block 0      to	100	    0 MMB
     - From block 101 	to  155000	30 MMB
     - From block 155001	to  405000	15 MMB
+
+For questions or comments, Please Email MamboCoin@gmail.com or Vist our Discord.
