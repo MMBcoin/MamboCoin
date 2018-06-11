@@ -1,12 +1,13 @@
 TEMPLATE = app
 TARGET = MamboCoin-qt
-VERSION = 1.0.0.0
+VERSION = 1.0.1.0
 INCLUDEPATH += src src/json src/qt src/qt/plugins/mrichtexteditor
 DEFINES += ENABLE_WALLET
-DEFINES += BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE
+DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE
 CONFIG += no_include_pwd
 CONFIG += thread
 CONFIG += static
+CONFIG += c++11
 QT += core gui network printsupport
 QMAKE_CXXFLAGS = -fpermissive
 
@@ -15,37 +16,6 @@ greaterThan(QT_MAJOR_VERSION, 4) {
     DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
 }
 
-
-win32 {
-BOOST_LIB_SUFFIX = -mt
-windows:LIBS += -lshlwapi
-LIBS += $$join(BOOST_LIB_PATH,,-L,) $$join(BDB_LIB_PATH,,-L,) $$join(OPENSSL_LIB_PATH,,-L,) $$join(QRENCODE_LIB_PATH,,-L,)
-LIBS += -lssl -lcrypto -ldb_cxx$$BDB_LIB_SUFFIX
-windows:LIBS += -lws2_32 -lole32 -loleaut32 -luuid -lgdi32
-LIBS += -lboost_system$$BOOST_LIB_SUFFIX -lboost_filesystem$$BOOST_LIB_SUFFIX -lboost_program_options$$BOOST_LIB_SUFFIX -lboost_thread_win32$$BOOST_LIB_SUFFIX
-BOOST_INCLUDE_PATH=C:/deps/boost_1_57_0
-BOOST_LIB_PATH=C:/deps/boost_1_57_0/stage/lib
-BDB_INCLUDE_PATH=C:/deps/db-4.8.30.NC/build_unix
-BDB_LIB_PATH=C:/deps/db-4.8.30.NC/build_unix
-OPENSSL_INCLUDE_PATH=C:/deps/openssl-1.0.2/include
-OPENSSL_LIB_PATH=C:/deps/openssl-1.0.2
-MINIUPNPC_INCLUDE_PATH=C:/deps/
-MINIUPNPC_LIB_PATH=C:/deps/miniupnpc
-LIBPNG_INCLUDE_PATH=C:/deps/libpng-1.6.16
-LIBPNG_LIB_PATH=C:/deps/libpng-1.6.16/.libs
-QRENCODE_INCLUDE_PATH=C:/deps/qrencode-3.4.4
-QRENCODE_LIB_PATH=C:/deps/qrencode-3.4.4/.libs
-SECP256K1_LIB_PATH =c:/Deps/secp256k1-0.13.2/libsecp256k1/.libs
-SECP256K1_INCLUDE_PATH = c:/Deps/secp256k1-0.13.2/libsecp256k1/include
-#GMP_INCLUDE_PATH=C:/deps/gmp-6.0.0
-#GMP_LIB_PATH=C:/deps/gmp-6.0.0/.libs
-}
-
-
-linux {
-    SECP256K1_LIB_PATH = /usr/local/lib
-    SECP256K1_INCLUDE_PATH = /usr/local/include
-}
 
 # for boost 1.37, add -mt to the boost libraries
 # use: qmake BOOST_LIB_SUFFIX=-mt
@@ -56,7 +26,10 @@ linux {
 # Dependency library locations can be customized with:
 #    BOOST_INCLUDE_PATH, BOOST_LIB_PATH, BDB_INCLUDE_PATH,
 #    BDB_LIB_PATH, OPENSSL_INCLUDE_PATH and OPENSSL_LIB_PATH respectively
-
+{
+SECP256K1_LIB_PATH=/usr/local/lib
+SECP256K1_INCLUDE_PATH=/usr/local/lib/secp256k1/include
+}
 OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
@@ -72,9 +45,12 @@ contains(RELEASE, 1) {
 
     !windows:!macx {
         # Linux: static link
-        # LIBS += -Wl,-Bstatic
+        LIBS += -Wl,-Bstatic
     }
 }
+
+LIBS += -pthread
+
 
 !win32 {
 # for extra security against potential buffer overflows: enable GCCs Stack Smashing Protection
@@ -83,28 +59,15 @@ QMAKE_LFLAGS *= -fstack-protector-all --param ssp-buffer-size=1
 # We need to exclude this for Windows cross compile with MinGW 4.2.x, as it will result in a non-working executable!
 # This can be enabled for Windows, when we switch to MinGW >= 4.4.x.
 }
+
+# for extra security (see: https://wiki.debian.org/Hardening): this flag is GCC compiler-specific
+QMAKE_CXXFLAGS *= -D_FORTIFY_SOURCE=2
 # for extra security on Windows: enable ASLR and DEP via GCC linker flags
 win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat
-# on win32: enable GCC large address aware linker flag
+# on Windows: enable GCC large address aware linker flag
 win32:QMAKE_LFLAGS *= -Wl,--large-address-aware -static
-win32:QMAKE_LFLAGS += -static-libgcc -static-libstdc++
-lessThan(QT_MAJOR_VERSION, 5): win32: QMAKE_LFLAGS *= -static
-
-# use: qmake "USE_QRCODE=1"
-# libqrencode (http://fukuchi.org/works/qrencode/index.en.html) must be installed for support
-contains(USE_QRCODE, 1) {
-    message(Building with QRCode support)
-    DEFINES += USE_QRCODE
-    LIBS += -lqrencode
-}
-
-# use: qmake "USE_UPNP=1" ( enabled by default; default)
-#  or: qmake "USE_UPNP=0" (disabled by default)
-#  or: qmake "USE_UPNP=-" (not supported)
-# miniupnpc (http://miniupnp.free.fr/files/) must be installed for support
-contains(USE_UPNP, -) {
-    message(Building without UPNP support)
-}
+# i686-w64-mingw32
+win32:QMAKE_LFLAGS *= -static-libgcc -static-libstdc++
 
 # use: qmake "USE_DBUS=1" or qmake "USE_DBUS=0"
 linux:count(USE_DBUS, 0) {
@@ -151,7 +114,7 @@ SOURCES += src/txdb-leveldb.cpp \
         QMAKE_RANLIB = $$replace(QMAKE_STRIP, strip, ranlib)
     }
     LIBS += -lshlwapi
-    #genleveldb.commands = cd $$PWD/src/leveldb && CC=$$QMAKE_CC CXX=$$QMAKE_CXX TARGET_OS=OS_WINDOWS_CROSSCOMPILE $(MAKE) OPT=\"$$QMAKE_CXXFLAGS $$QMAKE_CXXFLAGS_RELEASE\" libleveldb.a libmemenv.a && $$QMAKE_RANLIB $$PWD/src/leveldb/libleveldb.a && $$QMAKE_RANLIB $$PWD/src/leveldb/libmemenv.a
+    genleveldb.commands = cd $$PWD/src/leveldb && CC=$$QMAKE_CC CXX=$$QMAKE_CXX TARGET_OS=OS_WINDOWS_CROSSCOMPILE $(MAKE) OPT=\"$$QMAKE_CXXFLAGS $$QMAKE_CXXFLAGS_RELEASE\" libleveldb.a libmemenv.a && $$QMAKE_RANLIB $$PWD/src/leveldb/libleveldb.a && $$QMAKE_RANLIB $$PWD/src/leveldb/libmemenv.a
 }
 genleveldb.target = $$PWD/src/leveldb/libleveldb.a
 genleveldb.depends = FORCE
@@ -185,10 +148,15 @@ contains(USE_O3, 1) {
     QMAKE_CFLAGS += -msse2
 }
 
-QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wno-ignored-qualifiers -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector
+QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wno-unused-local-typedefs -Wno-ignored-qualifiers -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector
+QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-variable -fpermissive -Wno-format-extra-args
+
+windows:QMAKE_CXXFLAGS_WARN_ON += -Wno-cpp -Wno-maybe-uninitialized
+!macx:QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-local-typedefs
 
 # Input
 DEPENDPATH += src src/json src/qt
+
 HEADERS += src/qt/bitcoingui.h \
     src/qt/transactiontablemodel.h \
     src/qt/addresstablemodel.h \
@@ -483,12 +451,12 @@ OTHER_FILES += \
 # platform specific defaults, if not overridden on command line
 isEmpty(BOOST_LIB_SUFFIX) {
     macx:BOOST_LIB_SUFFIX = -mt
-    windows:BOOST_LIB_SUFFIX = -mgw49-mt-s-1_57
+    windows:BOOST_LIB_SUFFIX=-mgw49-mt-s-1_57
 }
 
 isEmpty(BOOST_THREAD_LIB_SUFFIX) {
     BOOST_THREAD_LIB_SUFFIX = $$BOOST_LIB_SUFFIX
-    #win32:BOOST_THREAD_LIB_SUFFIX = $$BOOST_LIB_SUFFIX
+    #win32:BOOST_THREAD_LIB_SUFFIX = _win32$$BOOST_LIB_SUFFIX
     #else:BOOST_THREAD_LIB_SUFFIX = $$BOOST_LIB_SUFFIX
 }
 

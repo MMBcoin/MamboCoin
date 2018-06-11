@@ -104,6 +104,10 @@ private:
     QAction *lockWalletAction;
     QAction *aboutQtAction;
     QAction *openRPCConsoleAction;
+    QAction *openConfEditorAction;
+    QAction *openMNConfEditorAction;
+    QAction *showBackupsAction;
+    QAction *openAction;
     QAction *masternodeManagerAction;
     QAction *messageAction;
 
@@ -186,6 +190,21 @@ private slots:
     void optionsClicked();
     /** Show about dialog */
     void aboutClicked();
+
+	/** Show debug window */
+    void showDebugWindow();
+
+    /** Show debug window and set focus to the appropriate tab */
+    void showInfo();
+    void showConsole();
+
+    /** Open external (default) editor with MamboCoin.conf */
+    void showConfEditor();
+    /** Open external (default) editor with masternode.conf */
+    void showMNConfEditor();
+    /** Show folder with wallet backups in default file browser */
+    void showBackups();
+
 #ifndef Q_OS_MAC
     /** Handle tray icon clicked */
     void trayIconActivated(QSystemTrayIcon::ActivationReason reason);

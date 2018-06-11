@@ -59,7 +59,7 @@ public:
 
         // Build the genesis block. Note that the output of the genesis coinbase cannot
         // be spent as it did not originally exist in the database.
-       
+
 
         const char *pszTimestamp = "Ready to join the MAMBO? 💃 🕺 2018/02/10";
         std::vector<CTxIn> vin;
@@ -84,12 +84,12 @@ public:
         assert(hashGenesisBlock == uint256("0x8c6199c2cb8e6d1d04253be9cf0bb922224a810cae666c2b2103b2b1fa089ade"));
         assert(genesis.hashMerkleRoot == uint256("0x9e0562e61f14892cf1ed9e67786b03bb80719bb34fa81bb8a77a66ff256c6258"));
 
-        vSeeds.push_back(CDNSSeedData("n0", "159.89.37.153:21410"));
-        vSeeds.push_back(CDNSSeedData("n1", "164.132.198.59:21410"));
+        vSeeds.push_back(CDNSSeedData("n0", "140.82.45.95:21410"));
+        vSeeds.push_back(CDNSSeedData("n1", "207.148.5.141:21410"));
         vSeeds.push_back(CDNSSeedData("n2", "173.249.7.89:21410"));
-        vSeeds.push_back(CDNSSeedData("n3", "5.189.152.63:21410"));
-        vSeeds.push_back(CDNSSeedData("n4", "5.189.152.63:21410"));
-        vSeeds.push_back(CDNSSeedData("n4", "138.68.68.149:21410"));
+        vSeeds.push_back(CDNSSeedData("n3", "159.89.37.153:21410"));
+        vSeeds.push_back(CDNSSeedData("n4", "108.61.78.233:21410"));
+        vSeeds.push_back(CDNSSeedData("n4", "79.135.200.89:21410"));
         vSeeds.push_back(CDNSSeedData("n4", "147.135.130.119:21410"));
 
 

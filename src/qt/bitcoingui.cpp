@@ -122,7 +122,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     // Create tabs
     overviewPage = new OverviewPage();
     overviewPage->setContentsMargins(0, 0, 0, 0);
-   
+
     transactionsPage = new QWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout();
     transactionView = new TransactionView(this);
@@ -139,7 +139,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     masternodeManagerPage = new MasternodeManager(this);
     messagePage = new MessagePage(this);
-    
+
     centralStackedWidget = new QStackedWidget(this);
     centralStackedWidget->setContentsMargins(0, 0, 0, 0);
     centralStackedWidget->addWidget(overviewPage);
@@ -188,7 +188,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     frameBlocksLayout->addStretch();
 
     frameBlocksLayout->addStretch();
-    
+
 
     if (GetBoolArg("-staking", true))
     {
@@ -203,7 +203,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     if (!fUseBlackTheme) {
         progressBarLabel->setStyleSheet("QLabel { color: #000000; }");
     } else {
-        progressBarLabel->setStyleSheet("QLabel { color: #ffffff; background-color: #404040; }");
+        progressBarLabel->setStyleSheet("QLabel { color: #000000; background-color: #404040; }");
     }
     progressBarLabel->setVisible(false);
     progressBar = new QProgressBar();
@@ -233,6 +233,9 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     // Clicking on a transaction on the overview page simply sends you to transaction history page
     connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), this, SLOT(gotoHistoryPage()));
     connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), transactionView, SLOT(focusTransaction(QModelIndex)));
+
+	// Open conf file
+    connect(openConfEditorAction, SIGNAL(triggered()), this, SLOT(showConfEditor()));
 
     // Double-clicking on a transaction on the transaction history page shows details
     connect(transactionView, SIGNAL(doubleClicked(QModelIndex)), transactionView, SLOT(showDetails()));
@@ -331,6 +334,10 @@ void BitcoinGUI::createActions()
     optionsAction = new QAction(tr("&Options..."), this);
     optionsAction->setToolTip(tr("Modify configuration options for MamboCoin"));
     optionsAction->setMenuRole(QAction::PreferencesRole);
+    openConfEditorAction = new QAction(QIcon(":/icons/edit"), tr("Open Wallet &Config"), this);
+    openConfEditorAction->setStatusTip(tr("Open Configuration File"));
+    showBackupsAction = new QAction(QIcon(":/icons/filesave"), tr("Show &Backups"), this);
+    showBackupsAction->setStatusTip(tr("Show Wallet backups"));
     toggleHideAction = new QAction(QIcon(":/icons/bitcoin"), tr("&Show / Hide"), this);
     encryptWalletAction = new QAction(tr("&Encrypt Wallet..."), this);
     encryptWalletAction->setToolTip(tr("Encrypt or decrypt wallet"));
@@ -347,6 +354,8 @@ void BitcoinGUI::createActions()
 
     exportAction = new QAction(tr("&Export..."), this);
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
+    openMNConfEditorAction = new QAction(QIcon(":/icons/configure"), tr("Open &Masternode Configuration File"), this);
+    openMNConfEditorAction->setStatusTip(tr("Open Masternode configuration file"));
     openRPCConsoleAction = new QAction(tr("&Debug window"), this);
     openRPCConsoleAction->setToolTip(tr("Open debugging and diagnostic console"));
 
@@ -362,7 +371,12 @@ void BitcoinGUI::createActions()
     connect(lockWalletAction, SIGNAL(triggered()), this, SLOT(lockWallet()));
     connect(signMessageAction, SIGNAL(triggered()), this, SLOT(gotoSignMessageTab()));
     connect(verifyMessageAction, SIGNAL(triggered()), this, SLOT(gotoVerifyMessageTab()));
-}
+
+	// Open configs and backup folder from menu
+    connect(openConfEditorAction, SIGNAL(triggered()), this, SLOT(showConfEditor()));
+    connect(openMNConfEditorAction, SIGNAL(triggered()), this, SLOT(showMNConfEditor()));
+    connect(showBackupsAction, SIGNAL(triggered()), this, SLOT(showBackups()));
+	}
 
 void BitcoinGUI::createMenuBar()
 {
@@ -389,6 +403,13 @@ void BitcoinGUI::createMenuBar()
     settings->addSeparator();
     settings->addAction(optionsAction);
 
+	QMenu *tools = appMenuBar->addMenu(tr("&Tools"));
+    tools->addAction(openConfEditorAction);
+    // TODO: MMB - hide this option for now
+    // tools->addAction(openMNConfEditorAction);
+    tools->addSeparator();
+    tools->addAction(showBackupsAction);
+
     QMenu *help = appMenuBar->addMenu(tr("&Help"));
     help->addAction(openRPCConsoleAction);
     help->addSeparator();
@@ -410,39 +431,39 @@ void BitcoinGUI::createToolBars()
     toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
     toolbar->setObjectName("tabs");
-    //toolbar->setStyleSheet("QToolButton { color: #101010; } QToolButton:hover { background-color: ##e0373f } QToolButton:checked { background-color: #c51f26 } QToolButton:pressed { background-color: none } #tabs { color: #101010; background-color: #f9f9f9);  }");
+     //toolbar->setStyleSheet("QToolButton { color: #101010; } QToolButton:hover { background-color: ##e0373f } QToolButton:checked { background-color: #c51f26 } QToolButton:pressed { background-color: none } #tabs { color: #101010; background-color: #f9f9f9);  }");
 
-	QString toolBarStyle = "QToolButton { color: #101010; ";
+ 	QString toolBarStyle = "";
 
-    if (!fUseBlackTheme) {
-        toolBarStyle += "border: 2px solid rgba(255,255,255,0);";
-    } else {
-        toolBarStyle += "border: 2px solid rgb(30,32,36);";
-    }
+     if (!fUseBlackTheme) {
+         toolBarStyle += "";
+     } else {
+         toolBarStyle += "";
+     }
 
-    toolBarStyle += " } QToolButton:hover { background-color: #afafaf;} QToolButton:checked { background-color: #8c8c8c; } QToolButton:pressed { background-color: none } #tabs { color: #101010; ";
+     toolBarStyle += "";
 
-    if (!fUseBlackTheme) {
-        toolBarStyle += "background-color: #ffffff;";
-    } else {
-        toolBarStyle += "background-color: #f9f9f9;";
-        //toolBarStyle += "background: rgb(41,44,48);";
-    }
-    toolBarStyle += "}";
-    toolbar->setStyleSheet(toolBarStyle);
+     if (!fUseBlackTheme) {
+         toolBarStyle += "";
+     } else {
+         toolBarStyle += "";
+         //toolBarStyle += "background: rgb(41,44,48);";
+     }
+     toolBarStyle += "}";
+     toolbar->setStyleSheet(toolBarStyle);
 
-    QLabel* header = new QLabel();
-    header->setMinimumSize(128, 128);
-    header->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    header->setPixmap(QPixmap(":/images/header"));
-    header->setMaximumSize(180,180);
-    header->setScaledContents(true);
-    if (fUseBlackTheme) {
-        header->setStyleSheet("QLabel { background: none }");
-    }
-    toolbar->addWidget(header);
+     QLabel* header = new QLabel();
+     header->setMinimumSize(128, 128);
+     header->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+     header->setPixmap(QPixmap(":/images/header"));
+     header->setMaximumSize(180,180);
+     header->setScaledContents(true);
+     if (fUseBlackTheme) {
+         header->setStyleSheet("QLabel { background: none }");
+     }
+     toolbar->addWidget(header);
 
-    //QMenu *toolbarMenu = new QMenu();
+     //QMenu *toolbarMenu = new QMenu();
     toolbar->addAction(overviewAction);
     toolbar->addAction(receiveCoinsAction);
     toolbar->addAction(sendCoinsAction);
@@ -578,6 +599,8 @@ void BitcoinGUI::createTrayIcon()
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(optionsAction);
     trayIconMenu->addAction(openRPCConsoleAction);
+    trayIconMenu->addAction(openConfEditorAction);
+
 #ifndef Q_OS_MAC // This is built-in on Mac
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);
@@ -611,6 +634,40 @@ void BitcoinGUI::aboutClicked()
     AboutDialog dlg;
     dlg.setModel(clientModel);
     dlg.exec();
+}
+
+void BitcoinGUI::showDebugWindow()
+{
+    rpcConsole->showNormal();
+    rpcConsole->show();
+    rpcConsole->raise();
+    rpcConsole->activateWindow();
+}
+
+void BitcoinGUI::showInfo()
+{
+    rpcConsole->show();
+    showDebugWindow();
+}
+void BitcoinGUI::showConsole()
+{
+    rpcConsole->show();
+    showDebugWindow();
+}
+
+void BitcoinGUI::showConfEditor()
+{
+    GUIUtil::openConfigfile();
+}
+
+void BitcoinGUI::showMNConfEditor()
+{
+    GUIUtil::openMNConfigfile();
+}
+
+void BitcoinGUI::showBackups()
+{
+    GUIUtil::showBackups();
 }
 
 void BitcoinGUI::setNumConnections(int count)
@@ -689,7 +746,7 @@ void BitcoinGUI::updateNumBlocks(int count, int totalSecs, int secs) {
         progressBar->setMaximum(totalSecs);
         progressBar->setValue(totalSecs - secs);
         progressBar->setVisible(true);
-        
+
         tooltip = tr("Catching up...") + QString("<br>") + tooltip;
         labelBlocksIcon->setMovie(syncIconMovie);
         if(count != prevBlocks)
@@ -1018,7 +1075,7 @@ void BitcoinGUI::setEncryptionStatus(int status)
         unlockWalletAction->setVisible(true);
         lockWalletAction->setVisible(true);
         encryptWalletAction->setEnabled(false);
-        
+
     }
     else
     {

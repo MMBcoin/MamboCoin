@@ -369,13 +369,13 @@
          </property>
         </widget>
        </item>
-       <!-- <item>
+       <item>
         <widget class="QCheckBox" name="useBlackTheme">
          <property name="text">
-          <string>Use black visual theme (requires restart)</string>
+          <string>Use DARK Theme (RESTART REQUIRED)</string>
          </property>
         </widget>
-       </item> -->
+       </item>
        <item>
         <spacer name="verticalSpacer_Display">
          <property name="orientation">

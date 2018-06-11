@@ -252,6 +252,34 @@ void openDebugLogfile()
         QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(pathDebug.string())));
 }
 
+void openConfigfile()
+{
+    boost::filesystem::path pathDebug = GetConfigFile();
+
+    /* Open conf with the associated application */
+    if (boost::filesystem::exists(pathDebug))
+        QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(pathDebug.string())));
+}
+
+void openMNConfigfile()
+{
+    boost::filesystem::path pathDebug = GetMasternodeConfigFile();
+
+    /* Open conf with the associated application */
+    if (boost::filesystem::exists(pathDebug))
+        QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(pathDebug.string())));
+}
+
+void showBackups()
+{
+    boost::filesystem::path pathDebug = GetDataDir(false);
+
+    /* Open folder with default browser */
+    if (boost::filesystem::exists(pathDebug))
+        QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(pathDebug.string())));
+}
+
+
 ToolTipToRichTextFilter::ToolTipToRichTextFilter(int size_threshold, QObject *parent) :
     QObject(parent), size_threshold(size_threshold)
 {
@@ -474,7 +502,7 @@ void SetBlackThemeQSS(QApplication& app)
                       "QMenuBar       { background: rgb(41,44,48); color: rgb(110,116,126); }"
                       "QMenu          { background: rgb(30,32,36); color: rgb(222,222,222); }"
                       "QMenu::item:selected { background-color: rgb(48,140,198); }"
-                      "QLabel         { color: rgb(120,127,139); }"
+                      "QLabel         { color: rgb(255,255,255); }"
                       "QScrollBar     { color: rgb(255,255,255); }"
                       "QCheckBox      { color: rgb(120,127,139); }"
                       "QRadioButton   { color: rgb(120,127,139); }"
@@ -482,8 +510,8 @@ void SetBlackThemeQSS(QApplication& app)
                       "QTabBar::tab:selected  { background: rgb(41,44,48); }"
                       "QTabBar::tab:!selected { background: rgb(24,26,30); margin-top: 2px; }"
                       "QTabWidget::pane { border: 1px solid rgb(78,79,83); }"
-                      "QToolButton    { background: rgb(30,32,36); color: rgb(116,122,134); border: none; border-left-color: rgb(30,32,36); border-left-style: solid; border-left-width: 6px; margin-top: 8px; margin-bottom: 8px; }"
-                      "QToolButton:checked { color: rgb(255,255,255); border: none; border-left-color: rgb(224,55,63); border-left-style: solid; border-left-width: 6px; }"
+                      "QToolButton    { background: rgb(30,32,36); color: rgb(48,140,198); border-style: outset; border-width: 2px; border-radius: 10px; border-color: rgb(48,140,198); font: bold 14px; min-width: 3em; padding: 1px; }"
+                      "QToolButton:checked { border-style: inset; border-left-color: rgb(255,0,0); border-radius: 10px;  border-left-style: solid; border-left-width: 6px; }"
                       "QProgressBar   { color: rgb(149,148,148); border-color: rgb(255,255,255); border-width: 3px; border-style: solid; }"
                       "QProgressBar::chunk { background: rgb(255,255,255); }"
                       "QTreeView::item { background: rgb(41,44,48); color: rgb(212,213,213); }"
@@ -494,4 +522,3 @@ void SetBlackThemeQSS(QApplication& app)
 }
 
 } // namespace GUIUtil
-

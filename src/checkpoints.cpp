@@ -28,7 +28,16 @@ namespace Checkpoints
     static MapCheckpoints mapCheckpoints = boost::assign::map_list_of
         (0,   uint256("0xaf1e3646b449968861d36e24f7ec00c65e136cf8683e282db63f95fc7922264c"))
         (1,   uint256("0x0000061eb8e6270066752fc3770765fb2d542bdb9bacf52f410c214d041d4d25"))
-       ;
+        (100,   uint256("0x000000006c98b2676db8c68b8e48265f8d3807c85a3d6f7b029198c42b64f76d"))
+        (1000,   uint256("0x000000000000322cd8a19f46783f3bfa644f3518e96f7205f27ec0fdb6dbdf65"))
+        (10000,   uint256("0x0000000000006fb3b7b5983f0dda1b288262fa2fcef022ac5d730c7432f20f8e"))
+        (50000,   uint256("0x00000000000016b8b0df2bddc05aeaaa2955bc253ad93c8aa6d908a7a34d5ffd"))
+        (100000,   uint256("0x000000000003296c26b195f32535c51bd3e22b89382f9a6da4afffba5734febf"))
+        (200000,   uint256("0x00000000000d792861d3b879a1cfcd86024a9a98f9287f4b062dc7be3244d189"))
+        (250000,   uint256("0x96101c4d31d3aaaa67fc01bd0a8153d11a645e7af7d6ce537054755342029eed"))
+        (300000,   uint256("0xc650a3be5e81d05dcf8332683f5a76ce1dffc9f7f4d39d259679cc3aefd88db4"))
+        (325000,   uint256("0x1c8d3c131530f2847fbcdfd919bb246a414d6dcd6bb006be5cb0952634043809"))
+        ;
 
 
     // TestNet has no checkpoints
@@ -187,7 +196,7 @@ namespace Checkpoints
         return false;
     }
 
-    // Automatically select a suitable sync-checkpoint 
+    // Automatically select a suitable sync-checkpoint
     uint256 AutoSelectSyncCheckpoint()
     {
         const CBlockIndex *pindex = pindexBest;
@@ -232,7 +241,7 @@ namespace Checkpoints
             return false;
         if (hashBlock == hashPendingCheckpoint)
             return true;
-        if (mapOrphanBlocks.count(hashPendingCheckpoint) 
+        if (mapOrphanBlocks.count(hashPendingCheckpoint)
             && hashBlock == WantedByOrphan(mapOrphanBlocks[hashPendingCheckpoint]))
             return true;
         return false;

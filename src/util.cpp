@@ -292,20 +292,14 @@ const std::string currentDateTime() {
     return buf;
 }
 
-int LogPrintStr(const std::string &str)
+int LogPrintStr(const std::string& str)
 {
     int ret = 0; // Returns total number of characters written
-    std::stringstream stream;
-    stream << currentDateTime() << " - " << str.data();
-    std::string log = stream.str();
-    
-    if (fPrintToConsole)
-    {
+    if (fPrintToConsole) {
         // print to console
-        ret = fwrite(log.data(), 1, log.size(), stdout);
-    }
-    else if (fPrintToDebugLog)
-    {
+        ret = fwrite(str.data(), 1, str.size(), stdout);
+        fflush(stdout);
+    } else if (fPrintToDebugLog) {
         static bool fStartedNewLine = true;
         boost::call_once(&DebugPrintInit, debugPrintInitFlag);
 
@@ -318,23 +312,23 @@ int LogPrintStr(const std::string &str)
         if (fReopenDebugLog) {
             fReopenDebugLog = false;
             boost::filesystem::path pathDebug = GetDataDir() / "debug.log";
-            if (freopen(pathDebug.string().c_str(),"a",fileout) != NULL)
+            if (freopen(pathDebug.string().c_str(), "a", fileout) != NULL)
                 setbuf(fileout, NULL); // unbuffered
         }
 
-        if (!str.empty() && str[str.size()-1] == '\n')
+        // Debug print useful for profiling
+        if (fLogTimestamps && fStartedNewLine)
+            ret += fprintf(fileout, "%s ", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetTime()).c_str());
+        if (!str.empty() && str[str.size() - 1] == '\n')
             fStartedNewLine = true;
         else
             fStartedNewLine = false;
 
-
-        ret = fwrite(log.data(), 1, log.size(), fileout);
+        ret = fwrite(str.data(), 1, str.size(), fileout);
     }
 
     return ret;
 }
-
-
 
 void ParseString(const string& str, char c, vector<string>& v)
 {
@@ -1179,11 +1173,13 @@ void createConf()       //Automatic MamboCoin.conf generation
                         "\nrpcallowip=127.0.0.1"
                         "\ndaemon=1"
                         "\nserver=1"
-                        "\naddnode=159.89.37.153";
+                        "\naddnode=207.148.5.141:21410"
+                        "\naddnode=140.82.45.95:21410"
+                        "\naddnode=159.89.37.153:21410";
 
     pConf   << std::string("rpcuser=")
             +  randomStrGen(10)
-            + std::string("\nrpcpassword=") 
+            + std::string("\nrpcpassword=")
             + randomStrGen(15)
             + std::string(nodes);
 
@@ -1286,7 +1282,7 @@ std::string getTimeString(int64_t timestamp, char *buffer, size_t nBuffer)
     struct tm* dt;
     time_t t = timestamp;
     dt = localtime(&t);
-    
+
     strftime(buffer, nBuffer, "%Y-%m-%d %H:%M:%S %z", dt); // %Z shows long strings on windows
     return std::string(buffer); // copies the null-terminated character sequence
 };
@@ -1301,7 +1297,7 @@ std::string bytesReadable(uint64_t nBytes)
         return strprintf("%.2f MB", nBytes/1024.0/1024.0);
     if (nBytes >= 1024)
         return strprintf("%.2f KB", nBytes/1024.0);
-    
+
     return strprintf("%d B", nBytes);
 };
 
@@ -1444,5 +1440,3 @@ std::string DateTimeStrFormat(const char* pszFormat, int64_t nTime)
     ss << boost::posix_time::from_time_t(nTime);
     return ss.str();
 }
-
-

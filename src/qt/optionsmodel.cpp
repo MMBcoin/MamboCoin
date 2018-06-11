@@ -46,7 +46,7 @@ void OptionsModel::Init()
     nTransactionFee = settings.value("nTransactionFee").toLongLong();
     nReserveBalance = settings.value("nReserveBalance").toLongLong();
     language = settings.value("language", "").toString();
-    fUseBlackTheme = settings.value("fUseBlackTheme", false).toBool();
+    fUseBlackTheme = settings.value("fUseBlackTheme", true).toBool();
 
     if (!settings.contains("nDarksendRounds"))
         settings.setValue("nDarksendRounds", 2);
@@ -221,7 +221,7 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
             settings.setValue("nAnonymizeMamboCoinAmount", nAnonymizeMamboCoinAmount);
             emit anonymizeMamboCoinAmountChanged(nAnonymizeMamboCoinAmount);
             break;
-        default:
+		default:
             break;
         }
     }
