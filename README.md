@@ -1,11 +1,14 @@
 # MamboCoin
 
-<a href="https://discord.gg/ZaxrJ6K"><img src="https://raw.githubusercontent.com/MMBcoin/MamboCoin/master/src/qt/res/images/splash.png" title="MMB" /></a>
+<a href="https://discord.gg/N5yMNdQ"><img src="https://raw.githubusercontent.com/MMBcoin/MamboCoin/master/src/qt/res/images/splash.png" title="MMB" /></a>
 
 ## Join Our Community on Discord!<br>
-<a href="https://discord.gg/ZaxrJ6K"><img src="https://i.imgur.com/ozcqH6a.png" title="MamboCoin Discord" /></a>
+<a href="https://discord.gg/N5yMNdQ"><img src="https://i.imgur.com/ozcqH6a.png" title="MamboCoin Discord" /></a>
 
-https://discord.gg/ZaxrJ6K
+https://discord.gg/N5yMNdQ
+
+# Explorer 
+http://mambo.blockxplorer.info/
 
 # MamboCoin Specifications:
 - POW+POS+MasterNodes
