@@ -35,7 +35,7 @@
 #include "masternodemanager.h"
 #include "messagemodel.h"
 #include "messagepage.h"
-#include "ROIreportdialog.h"
+#include "roireportdialog.h"
 
 #ifdef Q_OS_MAC
 #include "macdockiconhandler.h"
