@@ -38,6 +38,8 @@ class uint256;
 #define MASTERNODE_EXPIRATION_SECONDS          (43265*60) //Old 65*60
 #define MASTERNODE_REMOVAL_SECONDS             (43270*60) //Old 70*60
 
+#define MASTERNODE_BLOCK_OFFSET                50
+
 using namespace std;
 
 class CMasternodePaymentWinner;
@@ -102,7 +104,7 @@ public:
         protocolVersion = protocolVersionIn;
     }
 
-    uint256 CalculateScore(int mod=1, int64_t nBlockHeight=0);
+		uint256 CalculateScore(unsigned int nBlockHeight);
 
     void UpdateLastSeen(int64_t override=0)
     {
@@ -154,14 +156,11 @@ public:
 
 
 // Get the current winner for this block
-int GetCurrentMasterNode(int mod=1, int64_t nBlockHeight=0, int minProtocol=CMasterNode::minProtoVersion);
+int GetCurrentMasterNode(int mod=1, int64_t nBlockHeight=0, int minProtocol=0);
 
 int GetMasternodeByVin(CTxIn& vin);
-int GetMasternodeRank(CTxIn& vin, int64_t nBlockHeight=0, int minProtocol=CMasterNode::minProtoVersion);
-
-typedef pair<int, CMasterNode> MasterNodeRank;
-std::vector<MasterNodeRank> GetMasternodeRanks(int64_t nBlockHeight, int minProtocol=0);
-int GetMasternodeByRank(int findRank, int64_t nBlockHeight=0, int minProtocol=CMasterNode::minProtoVersion);
+int GetMasternodeRank(CTxIn& vin, int64_t nBlockHeight=0, int minProtocol=0);
+int GetMasternodeByRank(int findRank, int64_t nBlockHeight=0, int minProtocol=0);
 
 
 // for storing the winning payments
@@ -216,13 +215,19 @@ private:
     std::string strMainPubKey;
     bool enabled;
 
-public:
+	public:
 
-    CMasternodePayments() {
-        strMainPubKey = "04760f1bfc2b50a9eb1c6f8ecd3adfd5aa7f674eee729719808a48dc1f44f8c3efe81e90293b79ca9905373a9e63194a4054307d463864ca9336a16204c605e4a7";
-        strTestPubKey = "04760f1bfc2b50a9eb1c6f8ecd3adfd5aa7f674eee729719808a48dc1f44f8c3efe81e90293b79ca9905373a9e63194a4054307d463864ca9336a16204c605e4a7";
-        enabled = false;
-    }
+	    CMasternodePayments() {
+	      if (sporkManager.IsSporkActive(SPORK_6_PROTOCOL_V2_ENFORCEMENT)){
+	        strMainPubKey = "04f3c025fdd9f30d1e1a0ead591da10460b4fca985f673c73ce74216bfa2b858a3a67c31e8be2cf1efbc940a3dda172aacc8823cdbd94576913b9f2498405ad235";
+	        strTestPubKey = "04f3c025fdd9f30d1e1a0ead591da10460b4fca985f673c73ce74216bfa2b858a3a67c31e8be2cf1efbc940a3dda172aacc8823cdbd94576913b9f2498405ad235";
+	        } else {
+	        strMainPubKey = "04760f1bfc2b50a9eb1c6f8ecd3adfd5aa7f674eee729719808a48dc1f44f8c3efe81e90293b79ca9905373a9e63194a4054307d463864ca9336a16204c605e4a7";
+	        strTestPubKey = "04760f1bfc2b50a9eb1c6f8ecd3adfd5aa7f674eee729719808a48dc1f44f8c3efe81e90293b79ca9905373a9e63194a4054307d463864ca9336a16204c605e4a7";
+	      }
+
+	        enabled = false;
+	    }
 
     bool SetPrivKey(std::string strPrivKey);
     bool CheckSignature(CMasternodePaymentWinner& winner);

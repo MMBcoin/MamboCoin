@@ -59,7 +59,7 @@ MasternodeManager::MasternodeManager(QWidget *parent) :
     if(!GetBoolArg("-reindexaddr", false))
         timer->start(30000);
 
-    
+
 
     updateNodeList();
 }
@@ -76,7 +76,7 @@ static void NotifyAdrenalineNodeUpdated(MasternodeManager *page, CAdrenalineNode
     QString addr = QString::fromStdString(nodeConfig.sAddress);
     QString privkey = QString::fromStdString(nodeConfig.sMasternodePrivKey);
     QString collateral = QString::fromStdString(nodeConfig.sCollateralAddress);
-    
+
     QMetaObject::invokeMethod(page, "updateAdrenalineNode", Qt::QueuedConnection,
                               Q_ARG(QString, alias),
                               Q_ARG(QString, addr),
@@ -161,35 +161,7 @@ void MasternodeManager::updateNodeListConc()
         QMetaObject::invokeMethod(ui->countLabel, "setText", Qt::QueuedConnection, Q_ARG(QString, QString::number(ui->tableWidget->rowCount())));
         return;
     }
-
-    std::vector<MasterNodeRank> ranks = GetMasternodeRanks(pindexBest->nHeight);
-
-    //std::vector<MasternodeRow> tableRows;
-    masternodeTableRows.clear();
-    BOOST_FOREACH(MasterNodeRank r, ranks)
-    {
-        int rank = r.first;
-        CMasterNode mn = r.second;
-
-        CScript pubkey;
-            pubkey =GetScriptForDestination(mn.pubkey.GetID());
-            CTxDestination address1;
-            ExtractDestination(pubkey, address1);
-            CBitcoinAddress address2(address1);
-
-        MasternodeRow row;
-        row.addressItem = new QTableWidgetItem(QString::fromStdString(mn.addr.ToString()));
-        row.rankItem = new QTableWidgetItem(QString::number(rank));
-        row.activeItem = new QTableWidgetItem(QString::number(mn.IsEnabled()));
-        row.activeSecondsItem = new QTableWidgetItem(seconds_to_DHMS((qint64)(mn.lastTimeSeen - mn.now)));
-        row.lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat(mn.lastTimeSeen)));
-        row.pubkeyItem = new QTableWidgetItem(QString::fromStdString(address2.ToString()));
-        masternodeTableRows.push_back(row);
-    }
-
-    QMetaObject::invokeMethod(this, "updateMasternodeTable", Qt::QueuedConnection);
-
-    if(pwalletMain)
+        if(pwalletMain)
     {
         LOCK(cs_adrenaline);
         BOOST_FOREACH(PAIRTYPE(std::string, CAdrenalineNodeConfig) adrenaline, pwalletMain->mapMyAdrenalineNodes)
@@ -425,7 +397,7 @@ void MasternodeManager::on_startAllButton_clicked()
 	if(result)
 	{
    	    results += c.sAddress + ": STARTED\n";
-	}	
+	}
 	else
 	{
 	    results += c.sAddress + ": ERROR: " + errorMessage + "\n";
@@ -448,7 +420,7 @@ void MasternodeManager::on_stopAllButton_clicked()
 	if(result)
 	{
    	    results += c.sAddress + ": STOPPED\n";
-	}	
+	}
 	else
 	{
 	    results += c.sAddress + ": ERROR: " + errorMessage + "\n";

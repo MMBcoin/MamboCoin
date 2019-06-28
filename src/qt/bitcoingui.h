@@ -110,6 +110,8 @@ private:
     QAction *openAction;
     QAction *masternodeManagerAction;
     QAction *messageAction;
+    QAction *roiReportAction;
+
 
     QSystemTrayIcon *trayIcon;
     Notificator *notificator;
@@ -204,6 +206,10 @@ private slots:
     void showMNConfEditor();
     /** Show folder with wallet backups in default file browser */
     void showBackups();
+
+    /** Open roi report dialog */
+    void roiReportClicked();
+
 
 #ifndef Q_OS_MAC
     /** Handle tray icon clicked */

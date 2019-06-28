@@ -86,6 +86,11 @@ static const int64_t MAX_MONEY = 85000000 * COIN; //90M
 //static const int64_t COIN_YEAR_REWARD = 10 * CENT;
 //static const int64_t MAX_MINT_PROOF_OF_STAKE = 0.01 * COIN;
 
+//DEV FUNDING
+static const string DEVELOPER_ADDRESS = "mXmQhiH2ihozNj1wUFFpo4AQxdo6FTQ5hT";
+static const string DEVELOPER_ADDRESS_TESTNET = "mXmQhiH2ihozNj1wUFFpo4AQxdo6FTQ5hT";
+static const int64_t DEVELOPER_PAYMENT = 10 * CENT; //10% of reward
+
 // First POS block
 static const int MODIFIER_INTERVAL_SWITCH = 1;
 
@@ -102,6 +107,12 @@ inline int64_t FutureDrift(int64_t nTime, int nHeight) { return IsProtocolV2(nHe
 
 inline unsigned int GetTargetSpacing(int nHeight) { return IsProtocolV2(nHeight) ? 240 : 60; }
 inline int64_t GetMNCollateral() { return 30000; }
+
+
+// Boost version in Info tab
+static const string BOOST_VERSION_NUM = strprintf("Boost %d.%d.%d", (BOOST_VERSION/100000), BOOST_VERSION/100%1000, BOOST_VERSION%100);
+
+
 
 extern CScript COINBASE_FLAGS;
 extern CCriticalSection cs_main;
@@ -202,6 +213,8 @@ bool AbortNode(const std::string &msg, const std::string &userMessage="");
 void Misbehaving(NodeId nodeid, int howmuch);
 
 int64_t GetMasternodePayment(int nHeight, int64_t blockValue);
+int64_t GetDeveloperPayment(int64_t nBlockValue);
+CScript GetDeveloperScript();
 
 
 /** Position on disk for a particular transaction. */

@@ -3,11 +3,18 @@
 
 #include "clientmodel.h"
 #include "guiutil.h"
-
+#include "net.h"
+#include "main.h"
 #include "rpcserver.h"
 #include "rpcclient.h"
 
+#ifdef ENABLE_WALLET
+#include <db_cxx.h>
+#endif
+
 #include <QTime>
+#include <QTimer>
+
 #include <QThread>
 #include <QKeyEvent>
 #include <QUrl>
@@ -206,8 +213,22 @@ RPCConsole::RPCConsole(QWidget *parent) :
 
     connect(ui->clearButton, SIGNAL(clicked()), this, SLOT(clear()));
 
+// set library version labels
+#ifdef ENABLE_WALLET
+    ui->berkeleyDBVersion->setText(DbEnv::version(0, 0, 0));
+#else
+    ui->label_berkeleyDBVersion->hide();
+    ui->berkeleyDBVersion->hide();
+#endif
+
     // set OpenSSL version label
     ui->openSSLVersion->setText(SSLeay_version(SSLEAY_VERSION));
+
+    // set Boost version label
+    ui->boostVersion->setText(BOOST_VERSION_NUM.c_str());
+
+
+
 
     startExecutor();
     setTrafficGraphRange(INITIAL_TRAFFIC_GRAPH_MINS);
@@ -268,6 +289,11 @@ void RPCConsole::setClientModel(ClientModel *model)
 
         setNumBlocks(model->getNumBlocks());
         connect(model, SIGNAL(numBlocksChanged(int)), this, SLOT(setNumBlocks(int)));
+
+        timer = new QTimer(this); // refreshing debuging info
+        connect(timer, SIGNAL(timeout()), this, SLOT(refreshDebugInfo()));
+        timer->start(60 * 1000); // 60 seconds
+
 
         updateTrafficStats(model->getTotalBytesRecv(), model->getTotalBytesSent());
         connect(model, SIGNAL(bytesChanged(quint64,quint64)), this, SLOT(updateTrafficStats(quint64, quint64)));
@@ -342,6 +368,23 @@ void RPCConsole::message(int category, const QString &message, bool html)
     out += "</td></tr></table>";
     ui->messagesWidget->append(out);
 }
+
+
+//////// updating info tab
+void RPCConsole::refreshDebugInfo()
+{
+    // set UPNP status
+//    ui->UPNPInfo->setText(tr("%1 | %2").arg(DEFAULT_UPNP).arg(fUseUPnP ? "Enabled": "Disabled"));
+
+    updateLastBlockSeen();
+}
+
+void RPCConsole::updateLastBlockSeen()
+{
+    setNumBlocks(clientModel->getNumBlocks());
+}
+/////////  updating info tab
+
 
 void RPCConsole::setNumConnections(int count)
 {

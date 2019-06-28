@@ -33,6 +33,20 @@ static const int PING_INTERVAL = 1 * 60;
 /** Time after which to disconnect, after waiting for a ping response (or inactivity). */
 static const int TIMEOUT_INTERVAL = 20 * 60;
 
+
+/** -listen default */
+static const bool DEFAULT_LISTEN = true;
+/** -upnp default */
+#ifdef USE_UPNP
+static const bool DEFAULT_UPNP = USE_UPNP;
+#else
+static const bool DEFAULT_UPNP = false;
+#endif
+
+
+
+
+
 inline unsigned int ReceiveFloodSize() { return 2000*GetArg("-maxreceivebuffer", 5*1000); }
 inline unsigned int SendBufferSize() { return 5000*GetArg("-maxsendbuffer", 1*1000); }
 
@@ -101,6 +115,8 @@ enum {
 };
 
 extern bool fDiscover;
+extern bool fListen;
+extern bool fUseUPnP;
 extern uint64_t nLocalServices;
 extern uint64_t nLocalHostNonce;
 extern CAddrMan addrman;
@@ -196,16 +212,16 @@ public:
         nPeerId         = 0;
         fEnabled        = false;
     };
-    
+
     ~SecMsgNode() {};
-    
+
     int64_t                     lastSeen;
     int64_t                     lastMatched;
     int64_t                     ignoreUntil;
     uint32_t                    nWakeCounter;
     uint32_t                    nPeerId;
     bool                        fEnabled;
-    
+
 };
 
 
@@ -382,7 +398,7 @@ public:
     unsigned int GetTotalRecvSize()
     {
         unsigned int total = 0;
-        BOOST_FOREACH(const CNetMessage &msg, vRecvMsg) 
+        BOOST_FOREACH(const CNetMessage &msg, vRecvMsg)
             total += msg.vRecv.size() + 24;
         return total;
     }

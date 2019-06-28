@@ -35,6 +35,7 @@
 #include "masternodemanager.h"
 #include "messagemodel.h"
 #include "messagepage.h"
+#include "ROIreportdialog.h"
 
 #ifdef Q_OS_MAC
 #include "macdockiconhandler.h"
@@ -321,42 +322,60 @@ void BitcoinGUI::createActions()
     connect(messageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(messageAction, SIGNAL(triggered()), this, SLOT(gotoMessagePage()));
 
-    quitAction = new QAction(tr("E&xit"), this);
+    quitAction = new QAction(QIcon(":/icons/quit"), tr("E&xit"), this);
     quitAction->setToolTip(tr("Quit application"));
     quitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
     quitAction->setMenuRole(QAction::QuitRole);
-    aboutAction = new QAction(tr("&About MamboCoin"), this);
+
+    aboutAction = new QAction(QIcon(":/icons/bitcoin"), tr("&About MamboCoin"), this);
     aboutAction->setToolTip(tr("Show information about MamboCoin"));
     aboutAction->setMenuRole(QAction::AboutRole);
-    aboutQtAction = new QAction(tr("About &Qt"), this);
+
+    aboutQtAction = new QAction(QIcon(":/trolltech/qmessagebox/images/qtlogo-64.png"), tr("About &Qt"), this);
     aboutQtAction->setToolTip(tr("Show information about Qt"));
     aboutQtAction->setMenuRole(QAction::AboutQtRole);
-    optionsAction = new QAction(tr("&Options..."), this);
+
+    optionsAction = new QAction(QIcon(":/icons/options"), tr("&Options..."), this);
     optionsAction->setToolTip(tr("Modify configuration options for MamboCoin"));
     optionsAction->setMenuRole(QAction::PreferencesRole);
+
     openConfEditorAction = new QAction(QIcon(":/icons/edit"), tr("Open Wallet &Config"), this);
     openConfEditorAction->setStatusTip(tr("Open Configuration File"));
+
     showBackupsAction = new QAction(QIcon(":/icons/filesave"), tr("Show &Backups"), this);
     showBackupsAction->setStatusTip(tr("Show Wallet backups"));
-    toggleHideAction = new QAction(QIcon(":/icons/bitcoin"), tr("&Show / Hide"), this);
-    encryptWalletAction = new QAction(tr("&Encrypt Wallet..."), this);
-    encryptWalletAction->setToolTip(tr("Encrypt or decrypt wallet"));
-    backupWalletAction = new QAction(tr("&Backup Wallet..."), this);
-    backupWalletAction->setToolTip(tr("Backup wallet to another location"));
-    changePassphraseAction = new QAction(tr("&Change Passphrase..."), this);
-    changePassphraseAction->setToolTip(tr("Change the passphrase used for wallet encryption"));
-    unlockWalletAction = new QAction(tr("&Unlock Wallet..."), this);
-    unlockWalletAction->setToolTip(tr("Unlock wallet"));
-    lockWalletAction = new QAction(tr("&Lock Wallet"), this);
-    lockWalletAction->setToolTip(tr("Lock wallet"));
-    signMessageAction = new QAction(tr("Sign &message..."), this);
-    verifyMessageAction = new QAction(tr("&Verify message..."), this);
 
-    exportAction = new QAction(tr("&Export..."), this);
+    toggleHideAction = new QAction(QIcon(":/icons/bitcoin"), tr("&Show / Hide"), this);
+
+    encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Encrypt Wallet..."), this);
+    encryptWalletAction->setToolTip(tr("Encrypt or decrypt wallet"));
+
+    backupWalletAction = new QAction(QIcon(":/icons/filesave"), tr("&Backup Wallet..."), this);
+    backupWalletAction->setToolTip(tr("Backup wallet to another location"));
+
+    changePassphraseAction = new QAction(QIcon(":/icons/key"), tr("&Change Passphrase..."), this);
+    changePassphraseAction->setToolTip(tr("Change the passphrase used for wallet encryption"));
+
+    unlockWalletAction = new QAction(QIcon(":/icons/lock_open"), tr("&Unlock Wallet..."), this);
+    unlockWalletAction->setToolTip(tr("Unlock wallet"));
+
+    lockWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Lock Wallet"), this);
+    lockWalletAction->setToolTip(tr("Lock wallet"));
+
+    signMessageAction = new QAction(QIcon(":/icons/edit"), tr("Sign &message..."), this);
+    verifyMessageAction = new QAction(QIcon(":/icons/transaction_0"), tr("&Verify message..."), this);
+
+    //ROIreport
+    roiReportAction = new QAction(QIcon(":/icons/tx_mined"), tr("Show ROI Report"), this);
+    roiReportAction->setToolTip(tr("Open the ROI Report Box"));
+
+    exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
+
     openMNConfEditorAction = new QAction(QIcon(":/icons/configure"), tr("Open &Masternode Configuration File"), this);
     openMNConfEditorAction->setStatusTip(tr("Open Masternode configuration file"));
-    openRPCConsoleAction = new QAction(tr("&Debug window"), this);
+
+    openRPCConsoleAction = new QAction(QIcon(":/icons/debugwindow"), tr("&Debug window"), this);
     openRPCConsoleAction->setToolTip(tr("Open debugging and diagnostic console"));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
@@ -371,6 +390,7 @@ void BitcoinGUI::createActions()
     connect(lockWalletAction, SIGNAL(triggered()), this, SLOT(lockWallet()));
     connect(signMessageAction, SIGNAL(triggered()), this, SLOT(gotoSignMessageTab()));
     connect(verifyMessageAction, SIGNAL(triggered()), this, SLOT(gotoVerifyMessageTab()));
+    connect(roiReportAction, SIGNAL(triggered()), this, SLOT(roiReportClicked()));
 
 	// Open configs and backup folder from menu
     connect(openConfEditorAction, SIGNAL(triggered()), this, SLOT(showConfEditor()));
@@ -407,6 +427,7 @@ void BitcoinGUI::createMenuBar()
     tools->addAction(openConfEditorAction);
     // TODO: MMB - hide this option for now
     // tools->addAction(openMNConfEditorAction);
+    tools->addAction(roiReportAction);
     tools->addSeparator();
     tools->addAction(showBackupsAction);
 
@@ -600,6 +621,7 @@ void BitcoinGUI::createTrayIcon()
     trayIconMenu->addAction(optionsAction);
     trayIconMenu->addAction(openRPCConsoleAction);
     trayIconMenu->addAction(openConfEditorAction);
+    trayIconMenu->addAction(roiReportAction);
 
 #ifndef Q_OS_MAC // This is built-in on Mac
     trayIconMenu->addSeparator();
@@ -669,6 +691,15 @@ void BitcoinGUI::showBackups()
 {
     GUIUtil::showBackups();
 }
+
+// ROI report dialog
+void BitcoinGUI::roiReportClicked()
+{
+    static roiReportDialog dlg;
+    dlg.setModel(walletModel);
+    dlg.show();
+}
+
 
 void BitcoinGUI::setNumConnections(int count)
 {

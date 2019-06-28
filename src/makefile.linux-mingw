@@ -5,11 +5,15 @@
 TARGET_PLATFORM:=i686
 #TARGET_PLATFORM:=x86_64
 
-DEPSDIR:=/usr/$(TARGET_PLATFORM)-w64-mingw32
-CC:=$(TARGET_PLATFORM)-w64-mingw32-gcc
-CXX:=$(TARGET_PLATFORM)-w64-mingw32-g++
-RANLIB=$(TARGET_PLATFORM)-w64-mingw32-ranlib
-STRIP=$(TARGET_PLATFORM)-w64-mingw32-strip
+DEPSDIR:=/mnt/mxe/usr/$(TARGET_PLATFORM)-w64-mingw32.static
+HOST:=$(TARGET_PLATFORM)-w64-mingw32
+INCDIR:=$(DEPSDIR)/include
+LIBDIR:=$(DEPSDIR)/lib
+AR:=$(TARGET_PLATFORM)-w64-mingw32.static-ar
+CC:=$(TARGET_PLATFORM)-w64-mingw32.static-gcc
+CXX:=$(TARGET_PLATFORM)-w64-mingw32.static-g++
+RANLIB=$(TARGET_PLATFORM)-w64-mingw32.static-ranlib
+STRIP=$(TARGET_PLATFORM)-w64-mingw32.static-strip
 
 USE_UPNP:=0
 USE_WALLET:=1
@@ -17,15 +21,15 @@ USE_WALLET:=1
 INCLUDEPATHS= \
  -I"$(CURDIR)" \
  -I"$(CURDIR)"/obj \
- -I"$(DEPSDIR)/boost_1_55_0" \
- -I"$(DEPSDIR)/db-6.0.20/build_unix" \
- -I"$(DEPSDIR)/openssl-1.0.1f/include" \
- -I"$(DEPSDIR)"
+ -I"$(INCDIR)/boost" \
+ -I"$(INCDIR)/openssl/include" \
+ -I"$(INCDIR)/db-5.3.28/build_unix" \
+ -I"$(INCDIR)"
 
 LIBPATHS= \
- -L"$(DEPSDIR)/boost_1_55_0/stage/lib" \
- -L"$(DEPSDIR)/db-6.0.20/build_unix" \
- -L"$(DEPSDIR)/openssl-1.0.1f"
+ -L"$(INCDIR)/boost_1_57_0/stage/lib" \
+ -L"$(INCDIR)/db-5.3.28/build_unix" \
+ -L"$(INCDIR)/openssl"
 
 LIBS= \
  -l boost_system-mt \
@@ -115,6 +119,9 @@ leveldb/libleveldb.a:
 	@echo "Building LevelDB ..." && cd leveldb && CC=$(CC) CXX=$(CXX) TARGET_OS=OS_WINDOWS_CROSSCOMPILE CXXFLAGS="-I$(INCLUDEPATHS)" LDFLAGS="-L$(LIBPATHS)" $(MAKE) libleveldb.a libmemenv.a && $(RANLIB) libleveldb.a && $(RANLIB) libmemenv.a && cd ..
 obj/txdb-leveldb.o: leveldb/libleveldb.a
 
+# auto-generated dependencies:
+-include obj/*.P
+
 obj/build.h: FORCE
 	/bin/sh ../share/genbuild.sh obj/build.h
 version.cpp: obj/build.h
@@ -139,4 +146,10 @@ clean:
 	-rm -f obj/build.h
 	cd leveldb && TARGET_OS=OS_WINDOWS_CROSSCOMPILE $(MAKE) clean && cd ..
 
+print-%:
+	@echo '$*=$($*)'
+	@echo '  origin = $(origin $*)'
+	@echo '  flavor = $(flavor $*)'
+	@echo '   value = $(value  $*)'
+	
 FORCE:

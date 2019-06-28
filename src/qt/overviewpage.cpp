@@ -139,7 +139,7 @@ OverviewPage::OverviewPage(QWidget *parent) :
     lastNewBlock = 0;
 
     if(fLiteMode){
-        ui->frameDarksend->setVisible(false);
+        ui->frameDarksend->setVisible(true);
     } else {
 	qDebug() << "Dark Send Status Timer";
         timer = new QTimer(this);
@@ -150,7 +150,7 @@ OverviewPage::OverviewPage(QWidget *parent) :
 
     if(fMasterNode || fLiteMode){
         ui->toggleDarksend->setText("(" + tr("Disabled") + ")");
-        ui->toggleDarksend->setEnabled(false);
+        ui->toggleDarksend->setEnabled(true);
     }else if(!fEnableDarksend){
         ui->toggleDarksend->setText(tr("Start Darksend"));
     } else {
@@ -296,7 +296,7 @@ void OverviewPage::updateDarksendProgress()
 
         if(IsInitialBlockDownload()) return;
     }
-    
+
     qDebug() << "updateDarksendProgress() getbalance";
     int64_t nBalance = pwalletMain->GetBalance();
     if(nBalance == 0)

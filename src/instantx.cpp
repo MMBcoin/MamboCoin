@@ -34,7 +34,7 @@ int nCompleteTXLocks;
 
 void ProcessMessageInstantX(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)
 {
-    if(fLiteMode) return; //disable all darksend/masternode related functionality
+    /*if(fLiteMode) return; //disable all darksend/masternode related functionality*/
     if(!IsSporkActive(SPORK_1_MASTERNODE_PAYMENTS_ENFORCEMENT)) return;
 
     if (strCommand == "txlreq")
@@ -372,7 +372,7 @@ bool ProcessConsensusVote(CConsensusVote& ctx)
                 if(pwalletMain){
                     pwalletMain->UpdatedTransaction((*i).second.txHash);
                         nCompleteTXLocks++;
-                    
+
                 }
 #endif
 

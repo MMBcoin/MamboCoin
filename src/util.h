@@ -255,7 +255,7 @@ void runCommand(std::string strCommand);
 bool ParseInt32(const std::string& str, int32_t *out);
 
 
-/** 
+/**
  * Format a paragraph of text to a fixed width, adding spaces for
  * indentation to any added line.
  */
@@ -371,7 +371,14 @@ inline int64_t GetTimeMicros()
             boost::posix_time::ptime(boost::gregorian::date(1970,1,1))).total_microseconds();
 }
 
-std::string DateTimeStrFormat(const char* pszFormat, int64_t nTime);
+inline std::string DateTimeStrFormat(const char* pszFormat, int64_t nTime)
+{
+    time_t n = nTime;
+    struct tm* ptmTime = gmtime(&n);
+    char pszTime[200];
+    strftime(pszTime, sizeof(pszTime), pszFormat, ptmTime);
+    return pszTime;
+}
 
 static const std::string strTimestampFormat = "%Y-%m-%d %H:%M:%S UTC";
 inline std::string DateTimeStrFormat(int64_t nTime)
@@ -421,7 +428,7 @@ int64_t GetArg(const std::string& strArg, int64_t nDefault);
  * @param default (true or false)
  * @return command-line argument or default value
  */
-bool GetBoolArg(const std::string& strArg, bool fDefault);
+bool GetBoolArg(const std::string& strArg, bool fDefault=false);
 
 /**
  * Set an argument if it doesn't already have a value

@@ -2,6 +2,8 @@
 #define RPCCONSOLE_H
 
 #include <QDialog>
+#include <QTimer>
+
 
 namespace Ui {
     class RPCConsole;
@@ -55,6 +57,11 @@ public slots:
     void browseHistory(int offset);
     /** Scroll console view to end */
     void scrollToEnd();
+
+    void refreshDebugInfo();
+    void updateLastBlockSeen();
+
+
 signals:
     // For RPC command executor
     void stopExecutor();
@@ -68,6 +75,7 @@ private:
     ClientModel *clientModel;
     QStringList history;
     int historyPtr;
+    QTimer *timer;
 
     void startExecutor();
 };

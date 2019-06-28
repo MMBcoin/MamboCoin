@@ -462,6 +462,8 @@ HelpMessageBox::HelpMessageBox(QWidget *parent) :
         "  -lang=<lang>           " + tr("Set language, for example \"de_DE\" (default: system locale)") + "\n" +
         "  -min                   " + tr("Start minimized") + "\n" +
         "  -splash                " + tr("Show splash screen on startup (default: 1)") + "\n";
+        "  -disablereportupdate   " + tr("Disable auto update of roi report window (default: 0)") + "\n";
+
 
     setWindowTitle(tr("MamboCoin-Qt"));
     setTextFormat(Qt::PlainText);

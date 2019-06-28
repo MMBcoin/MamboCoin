@@ -60,6 +60,12 @@ private:
     bool fCoinControlFeatures;
     QString language;
 
+    /* settings that were overriden by command-line */
+    QString strOverriddenByCommandLine;
+
+    /// Add option to list of GUI options overridden through command line/config file
+    void addOverriddenOption(const std::string& option);
+
 signals:
     void displayUnitChanged(int unit);
     void transactionFeeChanged(qint64);

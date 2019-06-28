@@ -51,7 +51,7 @@ int RequestedMasterNodeList = 0;
 
 void ProcessMessageDarksend(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)
 {
-    if(fLiteMode) return; //disable all darksend/masternode related functionality
+    /*if(fLiteMode) return; //disable all darksend/masternode related functionality*/
 
     if (strCommand == "dsf") { //DarkSend Final tx
         if (pfrom->nVersion < darkSendPool.MIN_PEER_PROTO_VERSION) {

@@ -16,6 +16,7 @@
 #include "masternodeconfig.h"
 #include "spork.h"
 #include "smessage.h"
+#include "masternodeconfig.h"
 
 #ifdef ENABLE_WALLET
 #include "wallet.h"
@@ -269,8 +270,7 @@ std::string HelpMessage()
     strUsage += "  -rpcsslcertificatechainfile=<file.cert>  " + _("Server certificate file (default: server.cert)") + "\n";
     strUsage += "  -rpcsslprivatekeyfile=<file.pem>         " + _("Server private key (default: server.pem)") + "\n";
     strUsage += "  -rpcsslciphers=<ciphers>                 " + _("Acceptable ciphers (default: TLSv1.2+HIGH:TLSv1+HIGH:!SSLv2:!aNULL:!eNULL:!3DES:@STRENGTH)") + "\n";
-    strUsage += "  -litemode=<n>          " + _("Disable all Masternode and Darksend related functionality (0-1, default: 0)") + "\n";
-strUsage += "\n" + _("Masternode options:") + "\n";
+    strUsage += "\n" + _("Masternode options:") + "\n";
     strUsage += "  -masternode=<n>            " + _("Enable the client to act as a masternode (0-1, default: 0)") + "\n";
     strUsage += "  -mnconf=<file>             " + _("Specify masternode configuration file (default: masternode.conf)") + "\n";
     strUsage += "  -masternodeprivkey=<n>     " + _("Set the masternode private key") + "\n";
@@ -530,10 +530,17 @@ bool AppInit2(boost::thread_group& threadGroup)
     LogPrintf("MamboCoin version %s (%s)\n", FormatFullVersion(), CLIENT_DATE);
     LogPrintf("Using OpenSSL version %s\n", SSLeay_version(SSLEAY_VERSION));
     if (!fLogTimestamps)
-        LogPrintf("Startup time: %s\n", DateTimeStrFormat("%x %H:%M:%S", GetTime()));
+    LogPrintf("Startup time: %s\n", DateTimeStrFormat("%x %H:%M:%S", GetTime()));
     LogPrintf("Default data directory %s\n", GetDefaultDataDir().string());
     LogPrintf("Used data directory %s\n", strDataDir);
     std::ostringstream strErrors;
+
+    if (mapArgs.count("-sporkkey"))
+    {
+        if (!sporkManager.SetPrivKey(GetArg("-sporkkey", "")))
+            return InitError(_("Unable to sign spork message, wrong key?"));
+    }
+
 
     if (mapArgs.count("-masternodepaymentskey")) // masternode payments priv key
     {
@@ -885,13 +892,18 @@ bool AppInit2(boost::thread_group& threadGroup)
            addrman.size(), GetTimeMillis() - nStart);
 
     // ********************************************************* Step 10.1: startup secure messaging
-    
+
     SecureMsgStart(fNoSmsg, GetBoolArg("-smsgscanchain", false));
 
     // ********************************************************* Step 11: start node
 
     if (!CheckDiskSpace())
         return false;
+
+
+    string mnConfErr = "";
+    if (!masternodeConfig.read(mnConfErr))
+        return InitError("Masternode Conf Error: " + mnConfErr);
 
     if (!strErrors.str().empty())
         return InitError(strErrors.str());
@@ -956,12 +968,12 @@ bool AppInit2(boost::thread_group& threadGroup)
     }
 
     //lite mode disables all Masternode and Darksend related functionality
-    fLiteMode = GetBoolArg("-litemode", false);
+  /*  fLiteMode = GetBoolArg("-litemode", false);
     if(fMasterNode && fLiteMode){
         return InitError("You can not start a masternode in litemode");
     }
 
-    LogPrintf("fLiteMode %d\n", fLiteMode);
+    LogPrintf("fLiteMode %d\n", fLiteMode);*/
     LogPrintf("nInstantXDepth %d\n", nInstantXDepth);
     LogPrintf("Darksend rounds %d\n", nDarksendRounds);
     LogPrintf("Anonymize MamboCoin Amount %d\n", nAnonymizeMamboCoinAmount);
@@ -973,7 +985,7 @@ bool AppInit2(boost::thread_group& threadGroup)
        1MamboCoin+1000 == (.1MamboCoin+100)*10
        10MamboCoin+10000 == (1MamboCoin+1000)*10
     */
-    darkSendDenominations.push_back( (100000      * COIN)+100000000 );    
+    darkSendDenominations.push_back( (100000      * COIN)+100000000 );
     darkSendDenominations.push_back( (10000       * COIN)+10000000 );
     darkSendDenominations.push_back( (1000        * COIN)+1000000 );
     darkSendDenominations.push_back( (100         * COIN)+100000 );

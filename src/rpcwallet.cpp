@@ -277,7 +277,7 @@ Value sendtoaddress(const Array& params, bool fHelp)
     std::string sNarr;
     if (params.size() > 4 && params[4].type() != null_type && !params[4].get_str().empty())
         sNarr = params[4].get_str();
-    
+
     if (sNarr.length() > 24)
         throw runtime_error("Narration must be 24 characters or less.");
 
@@ -615,7 +615,7 @@ Value sendfrom(const Array& params, bool fHelp)
     std::string sNarr;
     if (params.size() > 6 && params[6].type() != null_type && !params[6].get_str().empty())
         sNarr = params[6].get_str();
-    
+
     if (sNarr.length() > 24)
         throw runtime_error("Narration must be 24 characters or less.");
 
@@ -1569,7 +1569,7 @@ Value makekeypair(const Array& params, bool fHelp)
     string strPrefix = "";
     if (params.size() > 0)
         strPrefix = params[0].get_str();
- 
+
     CKey key;
     key.MakeNewKey(false);
 
@@ -1600,22 +1600,22 @@ Value getnewstealthaddress(const Array& params, bool fHelp)
         throw runtime_error(
             "getnewstealthaddress [label]\n"
             "Returns a new MamboCoin stealth address for receiving payments anonymously.  ");
-    
+
     if (pwalletMain->IsLocked())
         throw runtime_error("Failed: Wallet must be unlocked.");
-    
+
     std::string sLabel;
     if (params.size() > 0)
         sLabel = params[0].get_str();
-    
+
     CStealthAddress sxAddr;
     std::string sError;
     if (!pwalletMain->NewStealthAddress(sError, sLabel, sxAddr))
         throw runtime_error(std::string("Could get new stealth address: ") + sError);
-    
+
     if (!pwalletMain->AddStealthAddress(sxAddr))
         throw runtime_error("Could not save to wallet.");
-    
+
     return sxAddr.Encoded();
 }
 
@@ -1625,27 +1625,27 @@ Value liststealthaddresses(const Array& params, bool fHelp)
         throw runtime_error(
             "liststealthaddresses [show_secrets=0]\n"
             "List owned stealth addresses.");
-    
+
     bool fShowSecrets = false;
-    
+
     if (params.size() > 0)
     {
         std::string str = params[0].get_str();
-        
+
         if (str == "0" || str == "n" || str == "no" || str == "-" || str == "false")
             fShowSecrets = false;
         else
             fShowSecrets = true;
     };
-    
+
     if (fShowSecrets)
     {
         if (pwalletMain->IsLocked())
             throw runtime_error("Failed: Wallet must be unlocked.");
     };
-    
+
     Object result;
-    
+
     //std::set<CStealthAddress>::iterator it;
     //for (it = pwalletMain->stealthAddresses.begin(); it != pwalletMain->stealthAddresses.end(); ++it)
     BOOST_FOREACH(CStealthAddress sit, pwalletMain->stealthAddresses)
@@ -1653,7 +1653,7 @@ Value liststealthaddresses(const Array& params, bool fHelp)
 	CStealthAddress* it = &(sit);
         if (it->scan_secret.size() < 1)
             continue; // stealth address is not owned
-        
+
         if (fShowSecrets)
         {
             Object objA;
@@ -1667,7 +1667,7 @@ Value liststealthaddresses(const Array& params, bool fHelp)
             result.push_back(Pair("Stealth Address", it->Encoded() + " - " + it->label));
         };
     };
-    
+
     return result;
 }
 
@@ -1677,20 +1677,20 @@ Value importstealthaddress(const Array& params, bool fHelp)
         throw runtime_error(
             "importstealthaddress <scan_secret> <spend_secret> [label]\n"
             "Import an owned stealth addresses.");
-    
+
     std::string sScanSecret  = params[0].get_str();
     std::string sSpendSecret = params[1].get_str();
     std::string sLabel;
-    
-    
+
+
     if (params.size() > 2)
     {
         sLabel = params[2].get_str();
     };
-    
+
     std::vector<uint8_t> vchScanSecret;
     std::vector<uint8_t> vchSpendSecret;
-    
+
     if (IsHex(sScanSecret))
     {
         vchScanSecret = ParseHex(sScanSecret);
@@ -1699,7 +1699,7 @@ Value importstealthaddress(const Array& params, bool fHelp)
         if (!DecodeBase58(sScanSecret, vchScanSecret))
             throw runtime_error("Could not decode scan secret as hex or base58.");
     };
-    
+
     if (IsHex(sSpendSecret))
     {
         vchSpendSecret = ParseHex(sSpendSecret);
@@ -1708,35 +1708,35 @@ Value importstealthaddress(const Array& params, bool fHelp)
         if (!DecodeBase58(sSpendSecret, vchSpendSecret))
             throw runtime_error("Could not decode spend secret as hex or base58.");
     };
-    
+
     if (vchScanSecret.size() != 32)
         throw runtime_error("Scan secret is not 32 bytes.");
     if (vchSpendSecret.size() != 32)
         throw runtime_error("Spend secret is not 32 bytes.");
-    
-    
+
+
     ec_secret scan_secret;
     ec_secret spend_secret;
-    
+
     memcpy(&scan_secret.e[0], &vchScanSecret[0], 32);
     memcpy(&spend_secret.e[0], &vchSpendSecret[0], 32);
-    
+
     ec_point scan_pubkey, spend_pubkey;
     if (SecretToPublicKey(scan_secret, scan_pubkey) != 0)
         throw runtime_error("Could not get scan public key.");
-    
+
     if (SecretToPublicKey(spend_secret, spend_pubkey) != 0)
         throw runtime_error("Could not get spend public key.");
-    
-    
+
+
     CStealthAddress sxAddr;
     sxAddr.label = sLabel;
     sxAddr.scan_pubkey = scan_pubkey;
     sxAddr.spend_pubkey = spend_pubkey;
-    
+
     sxAddr.scan_secret = vchScanSecret;
     sxAddr.spend_secret = vchSpendSecret;
-    
+
     Object result;
     bool fFound = false;
     // -- find if address already exists
@@ -1755,12 +1755,12 @@ Value importstealthaddress(const Array& params, bool fHelp)
                 fFound = true; // update stealth address with secrets
                 break;
             };
-            
+
             result.push_back(Pair("result", "Import failed - stealth address exists."));
             return result;
         };
     };
-    
+
     if (fFound)
     {
         result.push_back(Pair("result", "Success, updated " + sxAddr.Encoded()));
@@ -1769,11 +1769,11 @@ Value importstealthaddress(const Array& params, bool fHelp)
         pwalletMain->stealthAddresses.insert(sxAddr);
         result.push_back(Pair("result", "Success, imported " + sxAddr.Encoded()));
     };
-    
-    
+
+
     if (!pwalletMain->AddStealthAddress(sxAddr))
         throw runtime_error("Could not save to wallet.");
-    
+
     return result;
 }
 
@@ -1785,44 +1785,44 @@ Value sendtostealthaddress(const Array& params, bool fHelp)
             "sendtostealthaddress <stealth_address> <amount> [comment] [comment-to] [narration]\n"
             "<amount> is a real and is rounded to the nearest 0.000001"
             + HelpRequiringPassphrase());
-    
+
     if (pwalletMain->IsLocked())
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
-    
+
     std::string sEncoded = params[0].get_str();
     int64_t nAmount = AmountFromValue(params[1]);
-    
+
     std::string sNarr;
     if (params.size() > 4 && params[4].type() != null_type && !params[4].get_str().empty())
         sNarr = params[4].get_str();
-    
+
     if (sNarr.length() > 24)
         throw runtime_error("Narration must be 24 characters or less.");
-    
+
     CStealthAddress sxAddr;
     Object result;
-    
+
     if (!sxAddr.SetEncoded(sEncoded))
     {
         result.push_back(Pair("result", "Invalid MamboCoin stealth address."));
         return result;
     };
-    
-    
+
+
     CWalletTx wtx;
     if (params.size() > 2 && params[2].type() != null_type && !params[2].get_str().empty())
         wtx.mapValue["comment"] = params[2].get_str();
     if (params.size() > 3 && params[3].type() != null_type && !params[3].get_str().empty())
         wtx.mapValue["to"]      = params[3].get_str();
-    
+
     std::string sError;
     if (!pwalletMain->SendStealthMoneyToDestination(sxAddr, nAmount, sNarr, wtx, sError))
         throw JSONRPCError(RPC_WALLET_ERROR, sError);
 
     return wtx.GetHash().GetHex();
-    
+
     result.push_back(Pair("result", "Not implemented yet."));
-    
+
     return result;
 }
 
@@ -1832,17 +1832,17 @@ Value scanforalltxns(const Array& params, bool fHelp)
         throw runtime_error(
             "scanforalltxns [fromHeight]\n"
             "Scan blockchain for owned transactions.");
-    
+
     Object result;
     int32_t nFromHeight = 0;
-    
+
     CBlockIndex *pindex = pindexGenesisBlock;
-    
-    
+
+
     if (params.size() > 0)
         nFromHeight = params[0].get_int();
-    
-    
+
+
     if (nFromHeight > 0)
     {
         pindex = mapBlockIndex[hashBestChain];
@@ -1850,21 +1850,21 @@ Value scanforalltxns(const Array& params, bool fHelp)
             && pindex->pprev)
             pindex = pindex->pprev;
     };
-    
+
     if (pindex == NULL)
         throw runtime_error("Genesis Block is not set.");
-    
+
     {
         LOCK2(cs_main, pwalletMain->cs_wallet);
-        
+
         pwalletMain->MarkDirty();
-        
+
         pwalletMain->ScanForWalletTransactions(pindex, true);
         pwalletMain->ReacceptWalletTransactions();
     }
-    
+
     result.push_back(Pair("result", "Scan complete."));
-    
+
     return result;
 }
 
@@ -1874,19 +1874,19 @@ Value scanforstealthtxns(const Array& params, bool fHelp)
         throw runtime_error(
             "scanforstealthtxns [fromHeight]\n"
             "Scan blockchain for owned stealth transactions.");
-    
+
     Object result;
     uint32_t nBlocks = 0;
     uint32_t nTransactions = 0;
     int32_t nFromHeight = 0;
-    
+
     CBlockIndex *pindex = pindexGenesisBlock;
-    
-    
+
+
     if (params.size() > 0)
         nFromHeight = params[0].get_int();
-    
-    
+
+
     if (nFromHeight > 0)
     {
         pindex = mapBlockIndex[hashBestChain];
@@ -1894,45 +1894,225 @@ Value scanforstealthtxns(const Array& params, bool fHelp)
             && pindex->pprev)
             pindex = pindex->pprev;
     };
-    
+
     if (pindex == NULL)
         throw runtime_error("Genesis Block is not set.");
-    
+
     // -- locks in AddToWalletIfInvolvingMe
-    
+
     bool fUpdate = true; // todo: option?
-    
+
     pwalletMain->nStealth = 0;
     pwalletMain->nFoundStealth = 0;
-    
+
     while (pindex)
     {
         nBlocks++;
         CBlock block;
         block.ReadFromDisk(pindex, true);
-        
+
         BOOST_FOREACH(CTransaction& tx, block.vtx)
         {
-            
+
             nTransactions++;
-            
+
             pwalletMain->AddToWalletIfInvolvingMe(tx, &block, fUpdate);
         };
-        
+
         pindex = pindex->pnext;
     };
-    
+
     printf("Scanned %u blocks, %u transactions\n", nBlocks, nTransactions);
     printf("Found %u stealth transactions in blockchain.\n", pwalletMain->nStealth);
     printf("Found %u new owned stealth transactions.\n", pwalletMain->nFoundStealth);
-    
+
     char cbuf[256];
     snprintf(cbuf, sizeof(cbuf), "%u new stealth transactions.", pwalletMain->nFoundStealth);
-    
+
     result.push_back(Pair("result", "Scan complete."));
     result.push_back(Pair("found", std::string(cbuf)));
-    
+
     return result;
 }
 
+// getroireport
+struct StakePeriodRange_T {
+    int64_t Start;
+    int64_t End;
+    int64_t Total;
+    int Count;
+    string Name;
+};
 
+typedef vector<StakePeriodRange_T> vStakePeriodRange_T;
+
+// **em52: Get total coins rewarded on given period
+// inspired from CWallet::GetStake()
+// Parameter aRange = Vector with given limit date, and result
+// return int =  Number of Wallet's elements analyzed
+int GetsStakeSubTotal(vStakePeriodRange_T& aRange)
+{
+    int nElement = 0;
+    int64_t nAmount = 0;
+
+    const CWalletTx* pcoin;
+
+    vStakePeriodRange_T::iterator vIt;
+
+    // scan the entire wallet transactions
+    for (map<uint256, CWalletTx>::const_iterator it = pwalletMain->mapWallet.begin();
+         it != pwalletMain->mapWallet.end();
+         ++it)
+    {
+        pcoin = &(*it).second;
+
+        // skip orphan block or immature
+        if  ((!pcoin->GetDepthInMainChain()) || (pcoin->GetBlocksToMaturity()>0))
+            continue;
+
+        // skip transaction other than POS block
+        if (!(pcoin->IsCoinStake()))
+            continue;
+
+        nElement++;
+
+        // use the cached amount if available
+        if (pcoin->fCreditCached && pcoin->fDebitCached)
+            nAmount = pcoin->nCreditCached - pcoin->nDebitCached;
+        else
+            nAmount = pcoin->GetCredit() - pcoin->GetDebit();
+
+        // scan the range
+        for(vIt=aRange.begin(); vIt != aRange.end(); vIt++)
+        {
+            if (pcoin->nTime >= vIt->Start)
+            {
+                if (! vIt->End)
+                {   // Manage Special case
+                    vIt->Start = pcoin->nTime;
+                    vIt->Total = nAmount;
+                }
+                else if (pcoin->nTime <= vIt->End)
+                {
+                    vIt->Count++;
+                    vIt->Total += nAmount;
+                }
+            }
+        }
+
+    }
+    return nElement;
+}
+
+//     MINGW COMPILE FIX / GIVES ERRORS COMPILING ON WINDOWS ITSELF
+//
+//     Mingw fix still needs tweaking, since the time table display in roireport is way off
+
+
+	struct tm *
+localtime_r (const time_t *timer, struct tm *result)
+{
+   struct tm *local_result;
+   local_result = localtime (timer);
+   if (local_result == NULL || result == NULL)
+     return NULL;
+   memcpy (result, local_result, sizeof (result));
+   return result;
+}
+
+
+// prepare range for ROI report
+vStakePeriodRange_T PrepareRangeForroiReport()
+{
+  vStakePeriodRange_T aRange;
+      StakePeriodRange_T x;
+
+      struct tm Loc_MidNight;
+
+      int64_t n1Hour = 60*60;
+      int64_t n1Day = 24 * n1Hour;
+
+      int64_t nToday = GetTime();
+      time_t CurTime = nToday;
+
+      localtime_r(&CurTime, &Loc_MidNight);
+      Loc_MidNight.tm_hour = 0;
+      Loc_MidNight.tm_min = 0;
+      Loc_MidNight.tm_sec = 0;  // set midnight
+
+      x.Start = mktime(&Loc_MidNight);
+      x.End   = nToday;
+      x.Count = 0;
+      x.Total = 0;
+
+      // prepare last single 30 day Range
+    for(int i=0; i<30; i++)
+    {
+        x.Name = DateTimeStrFormat(x.Start);
+
+        aRange.push_back(x);
+
+        x.End    = x.Start - 1;
+        x.Start -= n1Day;
+    }
+
+    // prepare subtotal range of last 24H, 1 week, 30 days, 1 years
+    int GroupDays[4][2] = { {1 ,0}, {7 ,0 }, {30, 0}, {365, 0}};
+    string sGroupName[] = {"24H", "7 Days", "30 Days", "365 Days" };
+
+    nToday = GetTime();
+
+    for(int i=0; i<4; i++)
+    {
+        x.Start = nToday - GroupDays[i][0] * n1Day;
+        x.End   = nToday - GroupDays[i][1] * n1Day;
+        x.Name = "Last " + sGroupName[i];
+
+        aRange.push_back(x);
+    }
+
+    // Special case. not a subtotal, but last stake
+    x.End  = 0;
+    x.Start = 0;
+    x.Name = "Latest Reward";
+    aRange.push_back(x);
+
+return aRange;
+}
+
+// getroireport: return SubTotal of the Rewarded coin in last 24H, 7 days, etc.. of all owned addresses
+Value getroireport(const Array& params, bool fHelp)
+{
+    if ((params.size()>0) || (fHelp))
+        throw runtime_error(
+            "getroireport\n"
+            "List last single 30 day Reward subtotal and last 24h, 7, 30, 365 day subtotal.\n");
+
+    vStakePeriodRange_T aRange = PrepareRangeForroiReport();
+
+    // get subtotal calc
+    int64_t nTook = GetTimeMillis();
+    int nItemCounted = GetsStakeSubTotal(aRange);
+    nTook = GetTimeMillis() - nTook;
+
+    Object result;
+
+    vStakePeriodRange_T::iterator vIt;
+
+    // report it
+    for(vIt = aRange.begin(); vIt != aRange.end(); vIt++)
+    {
+        result.push_back(json_spirit::Pair(vIt->Name, FormatMoney(vIt->Total).c_str()));
+    }
+
+    vIt--;
+    result.push_back(json_spirit::Pair("Latest Time",
+       vIt->Start ? DateTimeStrFormat(vIt->Start).c_str() :
+       "Never"));
+
+    // report element counted / time took
+    result.push_back(json_spirit::Pair("Rewards counted", nItemCounted));
+    result.push_back(json_spirit::Pair("time took (ms)",  nTook ));
+
+    return  result;
+}

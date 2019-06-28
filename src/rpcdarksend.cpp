@@ -98,7 +98,7 @@ Value darksend(const Array& params, bool fHelp)
     // Wallet comments
     CWalletTx wtx;
     SendMoney(address.Get(), nAmount, wtx, ONLY_DENOMINATED);
-   
+
     return wtx.GetHash().GetHex();
 }
 
@@ -140,8 +140,9 @@ Value masternode(const Array& params, bool fHelp)
                 "  debug        - Print masternode status\n"
                 "  genkey       - Generate new masternodeprivkey\n"
                 "  enforce      - Enforce masternode payments\n"
-                "  list         - Print list of all known masternodes (see masternodelist for more info)\n"
-                "  list-conf    - Print masternode.conf in JSON format\n"
+                "  list         - Print list of all known masternodes (see masternode list full for ALL info)\n"
+                "  list-conf    - Print masternode.conf(UNUSED) in JSON format\n"
+                "  list full    - Print masternode LIST\n"
                 "  outputs      - Print masternode compatible outputs\n"
                 "  start        - Start masternode configured in magnet.conf\n"
                 "  start-alias  - Start single masternode by assigned alias configured in masternode.conf\n"
@@ -301,9 +302,9 @@ Value masternode(const Array& params, bool fHelp)
             strCommand = params[1].get_str().c_str();
         }
 
-        if (strCommand != "active" && strCommand != "vin" && strCommand != "pubkey" && strCommand != "lastseen" && strCommand != "activeseconds" && strCommand != "rank" && strCommand != "protocol"){
+        if (strCommand != "active" && strCommand != "vin" && strCommand != "pubkey" && strCommand != "lastseen" && strCommand != "activeseconds" && strCommand != "rank" && strCommand != "protocol" && strCommand != "full"){
             throw runtime_error(
-                "list supports 'active', 'vin', 'pubkey', 'lastseen', 'activeseconds', 'rank', 'protocol'\n");
+                "list supports 'active', 'vin', 'pubkey', 'lastseen', 'activeseconds', 'rank', 'protocol', 'full'\n");
         }
 
         Object obj;
@@ -330,6 +331,20 @@ Value masternode(const Array& params, bool fHelp)
                 obj.push_back(Pair(mn.addr.ToString().c_str(),       (int64_t)(mn.lastTimeSeen - mn.now)));
             } else if (strCommand == "rank") {
                 obj.push_back(Pair(mn.addr.ToString().c_str(),       (int)(GetMasternodeRank(mn.vin, pindexBest->nHeight))));
+            } else if (strCommand == "full") {
+                  CScript pubkey;
+                  pubkey = GetScriptForDestination(mn.pubkey.GetID());
+                  CTxDestination address1;
+                  ExtractDestination(pubkey, address1);
+                  CBitcoinAddress address2(address1);
+
+                  obj.push_back(Pair("rank", (int) (GetMasternodeRank(mn.vin, pindexBest->nHeight))));
+                  obj.push_back(Pair("vin", mn.vin.prevout.hash.ToString().c_str()));
+                  obj.push_back(Pair("pubkey", address2.ToString().c_str()));
+                  obj.push_back(Pair("protocol", (int64_t) mn.protocolVersion));
+                  obj.push_back(Pair("active", (int) mn.IsEnabled()));
+                  obj.push_back(Pair("lastseen", (int64_t) mn.lastTimeSeen));
+                  obj.push_back(Pair("activeseconds", (int64_t)(mn.lastTimeSeen - mn.now)));
             }
         }
         return obj;
@@ -627,4 +642,3 @@ Value masternode(const Array& params, bool fHelp)
 
     return Value::null;
 }
-

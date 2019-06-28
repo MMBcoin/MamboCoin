@@ -1,4 +1,4 @@
-// Copyright (c) 2015 The MamboCoin developers
+// Copyright (c) 2018 The MamboCoin developers
 // Copyright (c) 2009-2012 The Darkcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -22,13 +22,17 @@ using namespace boost;
 #define SPORK_1_MASTERNODE_PAYMENTS_ENFORCEMENT               10000
 #define SPORK_2_MAX_VALUE                                     10002
 #define SPORK_3_REPLAY_BLOCKS                                 10003
-#define SPORK_4_NOTUSED                                       10004
+#define SPORK_4_MASTERNODE_WINNER_ENFORCEMENT                 10004
+#define SPORK_5_DEVELOPER_PAYMENTS_ENFORCEMENT                10005
+#define SPORK_6_PROTOCOL_V2_ENFORCEMENT                       10006
 
 
-#define SPORK_1_MASTERNODE_PAYMENTS_ENFORCEMENT_DEFAULT       2428537599  //2015-4-8 23:59:59 GMT
-#define SPORK_2_MAX_VALUE_DEFAULT                             10000        //500 MamboCoin 
+#define SPORK_1_MASTERNODE_PAYMENTS_ENFORCEMENT_DEFAULT       4070908800 //OFF
+#define SPORK_2_MAX_VALUE_DEFAULT                             10000        //500 MamboCoin
 #define SPORK_3_REPLAY_BLOCKS_DEFAULT                         0
-#define SPORK_4_RECONVERGE_DEFAULT                            1420070400  //2047-1-1
+#define SPORK_4_MASTERNODE_WINNER_ENFORCEMENT_DEFAULT         4070908800 //OFF
+#define SPORK_5_DEVELOPER_PAYMENTS_ENFORCEMENT_DEFAULT        4070908800 //OFF
+#define SPORK_6_PROTOCOL_V2_ENFORCEMENT_DEFAULT               4070908800 //OFF
 
 class CSporkMessage;
 class CSporkManager;
@@ -94,10 +98,17 @@ private:
     std::string strMainPubKey;
 
 public:
+    std::string strTestPubKey;
+    std::string strMainPubKey;
 
     CSporkManager() {
+        if (sporkManager.IsSporkActive(SPORK_6_PROTOCOL_V2_ENFORCEMENT)){
+        strMainPubKey = "04a33a227770498a6ca964a9d39001ae3e425eab90cd044487c5d75a189f2b056c07d202fb2353f68309b94b207394453d5bc69f7d2a8a8309390b6ed6887fba51";
+        strTestPubKey = "04a33a227770498a6ca964a9d39001ae3e425eab90cd044487c5d75a189f2b056c07d202fb2353f68309b94b207394453d5bc69f7d2a8a8309390b6ed6887fba51";
+        } else {
         strMainPubKey = "04a983220ea7a38a7106385003fef77896538a382a0dcc389cc45f3c98751d9af423a097789757556259351198a8aaa628a1fd644c3232678c5845384c744ff8d7";
         strTestPubKey = "04a983220ea7a38a7106385003fef77896538a382a0dcc389cc45f3c98751d9af423a097789757556259351198a8aaa628a1fd644c3232678c5845384c744ff8d7";
+      }
     }
 
     std::string GetSporkNameByID(int id);

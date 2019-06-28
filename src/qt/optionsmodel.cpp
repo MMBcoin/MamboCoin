@@ -16,6 +16,12 @@ OptionsModel::OptionsModel(QObject *parent) :
     Init();
 }
 
+void OptionsModel::addOverriddenOption(const std::string& option)
+{
+    strOverriddenByCommandLine += QString::fromStdString(option) + "=" + QString::fromStdString(mapArgs[option]) + " ";
+}
+
+
 bool static ApplyProxySettings()
 {
     QSettings settings;
@@ -61,6 +67,14 @@ void OptionsModel::Init()
     // command-line options to override the GUI settings:
     if (settings.contains("fUseUPnP"))
         SoftSetBoolArg("-upnp", settings.value("fUseUPnP").toBool());
+
+    if (!settings.contains("fUseUPnP"))
+        settings.setValue("fUseUPnP", DEFAULT_UPNP);
+    if (!SoftSetBoolArg("-upnp", settings.value("fUseUPnP").toBool()))
+        addOverriddenOption("-upnp");
+
+
+
     if (settings.contains("addrProxy") && settings.value("fUseProxy").toBool())
         SoftSetArg("-proxy", settings.value("addrProxy").toString().toStdString());
     if (settings.contains("fMinimizeCoinAge"))

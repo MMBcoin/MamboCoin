@@ -24,6 +24,9 @@ using namespace std;
 map<uint256, CAlert> mapAlerts;
 CCriticalSection cs_mapAlerts;
 
+// alerts pubKey
+static const char* pszMainKey = "0407d44ed96f144ac12c3a5dd1639005e579b40fd9857bc0102c734e7dc3ced90510d42a42e521414450c88ebd86e16e03527b9f90d685b42a6221c7e056b969b5";
+
 void CUnsignedAlert::SetNull()
 {
     nVersion = 1;
@@ -70,13 +73,18 @@ std::string CUnsignedAlert::ToString() const
         nExpiration,
         nID,
         nCancel,
-        strSetCancel,
+        strSetCancel.c_str(),
         nMinVer,
         nMaxVer,
-        strSetSubVer,
+        strSetSubVer.c_str(),
         nPriority,
-        strComment,
-        strStatusBar);
+        strComment.c_str(),
+        strStatusBar.c_str());
+}
+
+void CUnsignedAlert::print() const
+{
+    LogPrintf("%s", ToString().c_str());
 }
 
 void CAlert::SetNull()
